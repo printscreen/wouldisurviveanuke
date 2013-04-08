@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+
+.options {
+    margin:5px 5px 0 0;
+}
+#population {
+    width:160px;
+}
+#cities {
+    width:85px;
+}
+#bombsize {
+    width:200px;
+}
+#square-ad{
+    width:250px;
+    height:250px;
+    position:absolute;
+    top:75px;
+    display:none;
+}
+#long-ad{
+    width:468px;
+    height:60px;
+    position:absolute;
+    display:none;
+}
+#mobile-ad{
+    width:320px;
+    height:50px;
+    position:absolute;
+    background-color:#000;
+}
+#map img {
+    max-width: none;
+}
+.map-module {
+    width:100%;
+    height:100%;
+}
+.navbar-fixed-top {
+    margin-bottom: 0px;
+}
+.social-icons {
+    line-hight:normal;
+    list-style: none outside none;
+    margin: 3px 0 0;
+    text-align: right;
+}
+.social-icons li {
+    float:left;
+    height: 36px;
+    padding: 0px;
+    width: 36px;
+}
+.social-icons li a {
+    padding: 3px !important;
+}
+
