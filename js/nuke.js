@@ -2,7 +2,7 @@ var Nuke = function (parameters) {
     "use strict";
     this.DEFAULT_LAT = 0;// USA 37.09024;
     this.DEFAULT_LON = 0;// USA -95.712891;
-    this.DEFAULT_ZOOM = 2;
+    this.DEFAULT_ZOOM = 3;
     this.DEFAULT_CITIES_PATH = 'cities.json';
     this.EARTHRADIUS = 6371;
     var self = this,
@@ -41,6 +41,7 @@ var Nuke = function (parameters) {
         });
         //Show map
         self.map.modules[options.map].show();
+
         $.ajax({
             url: options.cities,
             async: false,
@@ -52,6 +53,7 @@ var Nuke = function (parameters) {
                 alert('Unable to load cities');
             }
         });
+
     };
 
     methods.distance = function (lat1, lon1, lat2, lon2) {
@@ -183,24 +185,16 @@ var Nuke = function (parameters) {
             vY = methods.cY(lon, zY[0], (i * (360 / step)));
             results.outerOuter[i] = [vX, vY];
         }
+
         return results;
     };
 
-    methods.calculateDamage = function (fromLat, fromLon, toLat, toLon, radiuses) {
-        var distance = methods.distance(fromLat, fromLon, toLat, toLon);
-        if(distance < methods.distance(fromLat, fromLon, radiuses.innerInner[0][0],radiuses.innerInner[0][1])) {
-            return DAMAGETYPES.DEATH;
+    this.setDamage = function(numberOfRadiusContainPoint) {
+        if(numberOfRadiusContainPoint > 4) {
+            damage = 4;
+        } else {
+            damage = numberOfRadiusContainPoint;
         }
-        if(distance < methods.distance(fromLat, fromLon, radiuses.innerOuter[0][0],radiuses.innerOuter[0][1])) {
-            return DAMAGETYPES.FIRSTDEGREE;
-        }
-        if(distance < methods.distance(fromLat, fromLon, radiuses.outerInner[0][0],radiuses.outerInner[0][1])) {
-            return DAMAGETYPES.SECONDDEGREE;
-        }
-        if(distance < methods.distance(fromLat, fromLon, radiuses.outerOuter[0][0],radiuses.outerOuter[0][1])) {
-            return DAMAGETYPES.THIRDDEGREE;
-        }
-        return DAMAGETYPES.NONE;
     };
 
     this.getOptions = function () {
@@ -224,18 +218,20 @@ var Nuke = function (parameters) {
         return this;
     };
 
-    this.dropBomb = function (lat, lon, bombsize, population, numOfCities) {
+    this.dropBomb = function (lat, lon, bombsize, population, numOfCities, message) {
         cities = methods.getClosestCities(lat, lon);
         var bombedCities = [],
             radius = [],
             damages = [],
             map = self.map.modules[options.map];
-        map.clearMap().setCenter(lat, lon).addMarker(lat, lon);
+
+        map.clearMap().setCenter(lat, lon).addMarker(lat, lon, true, function() {
+            self.dropBomb(this.position.lat(), this.position.lng(), bombsize, population, numOfCities, message);
+        });
         $.each(cities, function (key, val) {
             if (val[2] > population) {
                 bombedCities.push(val);
                 radius = methods.getRadius(val[0], val[1], bombsize);
-                damages.push(methods.calculateDamage(val[0], val[1], lat, lon, radius));
                 map.drawRadius(options.outerOuter, radius.outerOuter)
                     .drawRadius(options.outerInner, radius.outerInner)
                     .drawRadius(options.innerOuter, radius.innerOuter)
@@ -247,7 +243,12 @@ var Nuke = function (parameters) {
                 return false;
             }
         });
-        damage = Math.max.apply(null, damages);
+
+        this.setDamage(
+            map.numberOfRadiusContainPoint(lat, lon)
+        );
+
+        self.setMessage(lat, lon, message.call(this));
     };
     methods.init();
 };

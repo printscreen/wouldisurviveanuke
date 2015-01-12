@@ -2,13 +2,13 @@ var NukeSite = {
     nuke: {},
     geocoder: {},
     init : function () {
+        this.window();
         this.nuke = new Nuke({
             map: 'google',
             mapType: 'road'
         });
         this.geocoder = geocoder = new google.maps.Geocoder();
         this.listeners();
-        this.window();
         if (typeof window.navigator.geolocation === 'undefined') {
             $('#usemylocation').hide();
         }
@@ -46,16 +46,21 @@ var NukeSite = {
         var message;
         $('input[name="lat"]').val(lat);
         $('input[name="lon"]').val(lon);
+
         this.nuke.dropBomb(
             lat,
             lon,
             this.getBombSize(),
             this.getPopulation(),
-            this.getCities()
+            this.getCities(),
+            function() {
+                return '<b>Result:</b>&nbsp;<u>' + $('#damages .'+this.getDamage()).attr('damage-class') + '</u><br />' +
+                $($('#damages .'+this.getDamage()+' li')[
+                    Math.floor((Math.random() * 100) % $('#damages .'+this.getDamage()+' li').length)
+                ]).html();
+            }
         );
-        message = '<b>Result:</b>&nbsp;<u>' + $('#damages .'+this.nuke.getDamage()).attr('damage-class') + '</u><br />' +
-                   $($('#damages .'+this.nuke.getDamage()+' li')[Math.floor((Math.random() * 100) % 3)]).html();
-        this.nuke.setMessage(lat, lon, message);
+
         if ($('.navbar .btn-navbar').is(':visible')) {
             $('a[data-toggle="collapse"]').click();
         }
@@ -86,19 +91,26 @@ var NukeSite = {
     },
     window : function () {
         //Please divert your eyes from this awful hack
+        var map = $('#map');
         if($(window).width() > 980) {
             $('#mobile-ad').css('display','none');
             $('#square-ad').css('display','inline')
                     .css('left',$('#map').width() + (($(window).width() - $('#map').width()) / 2) - 255);
             $('#long-ad').css('display','inline')
                     .css('left', (($(window).width() - $('#map').width()) /2) + 70).css('top', $(window).height() - 70);
-            $('#map').css('padding-top','41px');
-            $('#map').height($(window).height() - $('.navbar-inner').height());
+            map.removeClass('container')
+               .height(
+                    $(window).height() - $('.navbar-inner').height()
+                )
+               .css('padding-top','41px');
         } else {
             $('#mobile-ad').css('display','inline')
             .css('left', parseInt($(window).width()/2) - 160);
-            $('#map').css('padding-top','50px');
-            $('#map').height($(window).height() - $('.navbar-inner').height() - 70);
+            map.addClass('container')
+               .height(
+                    $(window).height() - $('.navbar-inner').height() - 70
+                )
+               .css('padding-top','50px');
             $('a[data-toggle="collapse"]').click();
         }
         $(window).resize(function(){
@@ -108,13 +120,21 @@ var NukeSite = {
                 .css('left',$('#map').width() + (($(window).width() - $('#map').width()) / 2) - 255);
                 $('#long-ad').css('display','inline')
                 .css('left', (($(window).width() - $('#map').width()) /2) + 70).css('top', $(window).height() - 70);
-                $('#map').css('padding-top','41px');
+            map.removeClass('container')
+               .height(
+                    $(window).height() - $('.navbar-inner').height()
+                )
+               .css('padding-top','41px');
             } else {
                 $('#square-ad').css('display','none');
                 $('#long-ad').css('display','none');
                 $('#mobile-ad').css('display','inline')
                 .css('left', parseInt($(window).width()/2) - 160);
-                $('#map').css('padding-top','50px');
+                map.addClass('container')
+               .height(
+                    $(window).height() - $('.navbar-inner').height() - 70
+                )
+                .css('padding-top','50px');
             }
         });
     }

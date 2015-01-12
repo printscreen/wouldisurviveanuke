@@ -17,6 +17,7 @@ Nuke.prototype.map.modules.google = function (base, index) {
 
     this.init = function () {
         $('<div>').attr('id', name).addClass('map-module').hide().appendTo(base.getOption('mapArea'));
+
         map = new google.maps.Map(
             $('#' + name).get(0), {
                 center: new google.maps.LatLng(base.getOption('lat'), base.getOption('lon')),
@@ -64,14 +65,18 @@ Nuke.prototype.map.modules.google = function (base, index) {
         return this;
     };
 
-    this.addMarker = function (lat, lon) {
-        markers.push(
-            new google.maps.Marker({
+    this.addMarker = function (lat, lon, draggable, listener) {
+        var marker = new google.maps.Marker({
                 map: map,
-                draggable: false,
+                draggable: draggable || false,
                 position: new google.maps.LatLng(lat, lon)
-            })
-        );
+            });
+
+        if(typeof listener === 'function') {
+            google.maps.event.addDomListener(marker, 'dragend', listener);
+        }
+
+        markers.push(marker);
         methods.fitBound(lat, lon);
         return this;
     };
@@ -114,10 +119,23 @@ Nuke.prototype.map.modules.google = function (base, index) {
         return this;
     };
 
+    this.numberOfRadiusContainPoint = function (lat, lon) {
+        var i,
+        point = new google.maps.LatLng(lat, lon),
+        numberOfRadius = 0;
+        for(i = 0; i < bombRadiuses.length; i++) {
+            if(google.maps.geometry.poly.containsLocation(point, bombRadiuses[i])) {
+                numberOfRadius += 1;
+            }
+        }
+        return numberOfRadius;
+    };
+
     this.addInfoWindow = function (lat, lon, message) {
         var infoWindow = new google.maps.InfoWindow({
                 content: message,
                 position: new google.maps.LatLng(lat, lon),
+                pixelOffset: new google.maps.Size(-1, -25),
                 maxWidth: 300
         });
         infoWindow.open(map);
