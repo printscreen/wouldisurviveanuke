@@ -63,6 +63,7 @@ var NukeSite = {
 
         if ($('.navbar .btn-navbar').is(':visible')) {
             $('a[data-toggle="collapse"]').click();
+
         }
     },
     listeners : function () {
@@ -113,30 +114,7 @@ var NukeSite = {
                .css('padding-top','50px');
             $('a[data-toggle="collapse"]').click();
         }
-        $(window).resize(function(){
-            if($(window).width() > 980) {
-                $('#mobile-ad').css('display','none');
-                $('#square-ad').css('display','inline')
-                .css('left',$('#map').width() + (($(window).width() - $('#map').width()) / 2) - 255);
-                $('#long-ad').css('display','inline')
-                .css('left', (($(window).width() - $('#map').width()) /2) + 70).css('top', $(window).height() - 70);
-            map.removeClass('container')
-               .height(
-                    $(window).height() - $('.navbar-inner').height()
-                )
-               .css('padding-top','41px');
-            } else {
-                $('#square-ad').css('display','none');
-                $('#long-ad').css('display','none');
-                $('#mobile-ad').css('display','inline')
-                .css('left', parseInt($(window).width()/2) - 160);
-                map.addClass('container')
-               .height(
-                    $(window).height() - $('.navbar-inner').height() - 70
-                )
-                .css('padding-top','50px');
-            }
-        });
+
     }
 };
 
